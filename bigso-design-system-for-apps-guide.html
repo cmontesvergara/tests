@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIGSO · Sistema de Diseño para Aplicaciones</title>
+<style>
+  :root {
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    background: #f4f2ee;
+    color: #1a1a2e;
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 240px;
+    height: 100vh;
+    background: #1a1a2e;
+    color: #fff;
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 16px;
+    border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo .brand { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+  .sidebar-logo .sub { font-size: 10px; color: rgba(255,255,255,0.35); letter-spacing: 0.06em; margin-top: 2px; }
+
+  .sidebar nav { padding: 12px 0; flex: 1; }
+  .nav-group-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.3);
+    padding: 12px 20px 4px;
+    text-transform: uppercase;
+  }
+  .nav-link {
+    display: block;
+    padding: 7px 20px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+  .nav-link.active { color: #fff; border-left-color: #e05a20; background: rgba(255,255,255,0.07); }
+
+  .sidebar-footer {
+    padding: 12px 20px;
+    border-top: 0.5px solid rgba(255,255,255,0.08);
+    font-size: 9px;
+    color: rgba(255,255,255,0.2);
+    letter-spacing: 0.04em;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 240px;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 0.5px solid #e5ddd4;
+    padding: 0 40px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .topbar-title { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+  .topbar-meta { font-size: 11px; color: #9a9a9a; }
+  .version-badge {
+    font-size: 10px; font-weight: 600;
+    background: #e05a20; color: #fff;
+    padding: 2px 8px; border-radius: 20px;
+  }
+
+  .content { padding: 40px; max-width: 960px; }
+
+  /* SECTIONS */
+  .section { margin-bottom: 64px; scroll-margin-top: 72px; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px;
+  }
+  .section-number {
+    width: 28px; height: 28px;
+    background: #e05a20; color: #fff;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .section-title { font-size: 22px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.3px; }
+  .section-desc { font-size: 14px; color: #6b6b80; margin-bottom: 24px; line-height: 1.7; }
+
+  /* CARDS */
+  .card {
+    background: #fff;
+    border: 0.5px solid #e5ddd4;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-card);
+    margin-bottom: 16px;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: #1a1a2e; margin-bottom: 4px; }
+  .card-desc { font-size: 12px; color: #6b6b80; margin-bottom: 16px; }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* CODE */
+  pre, code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  pre {
+    background: #f4f2ee;
+    border: 0.5px solid #e5ddd4;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    overflow-x: auto;
+    line-height: 1.7;
+    color: #3a3a4e;
+    margin: 12px 0;
+  }
+  code {
+    background: #f4f2ee;
+    padding: 1px 5px;
+    border-radius: 4px;
+    color: #e05a20;
+    font-size: 11px;
+  }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left; padding: 8px 12px;
+    background: #f9f6f2; color: #6b6b80;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    border-bottom: 0.5px solid #e5ddd4;
+  }
+  td {
+    padding: 10px 12px;
+    border-bottom: 0.5px solid #f0f0f0;
+    color: #1a1a2e;
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  /* COLOR SWATCHES */
+  .swatch-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
+  .swatch {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 0.5px solid rgba(0,0,0,0.07);
+  }
+  .swatch-color { height: 56px; }
+  .swatch-info { padding: 8px 10px; background: #fff; }
+  .swatch-name { font-size: 11px; font-weight: 600; color: #1a1a2e; }
+  .swatch-hex { font-size: 10px; color: #9a9a9a; font-family: var(--font-mono); }
+  .swatch-role { font-size: 9px; color: #bdbdbd; margin-top: 2px; }
+
+  /* PALETTE ROLE */
+  .palette-section { margin-bottom: 24px; }
+  .palette-label { font-size: 11px; font-weight: 600; color: #6b6b80; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+
+  /* TYPOGRAPHY SCALE */
+  .type-sample {
+    padding: 16px 0;
+    border-bottom: 0.5px solid #f0f0f0;
+    display: flex; align-items: baseline; gap: 24px;
+  }
+  .type-sample:last-child { border-bottom: none; }
+  .type-meta { width: 120px; flex-shrink: 0; }
+  .type-meta-name { font-size: 11px; font-weight: 600; color: #6b6b80; }
+  .type-meta-spec { font-size: 10px; color: #bdbdbd; font-family: var(--font-mono); margin-top: 2px; }
+
+  /* SPACING SCALE */
+  .space-row { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+  .space-bar { background: #e05a20; height: 8px; border-radius: 4px; opacity: 0.8; }
+  .space-label { font-size: 11px; font-weight: 600; color: #1a1a2e; width: 40px; }
+  .space-desc { font-size: 11px; color: #9a9a9a; }
+
+  /* RADIUS DEMO */
+  .radius-demo { display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap; }
+  .radius-box {
+    background: #f4f2ee; border: 1.5px solid #d0cab8;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 12px 16px; font-size: 11px; color: #6b6b80; gap: 4px;
+  }
+  .radius-name { font-weight: 600; font-size: 12px; color: #1a1a2e; }
+
+  /* BRAND HIERARCHY */
+  .hierarchy-box {
+    background: #fff; border: 0.5px solid #e5ddd4;
+    border-radius: var(--radius-md); padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .hierarchy-level { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 0.5px solid #f0f0f0; }
+  .hierarchy-level:last-child { border-bottom: none; }
+  .hierarchy-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .hierarchy-name { font-size: 14px; font-weight: 700; }
+  .hierarchy-role { font-size: 12px; color: #6b6b80; }
+  .hierarchy-when { font-size: 11px; color: #bdbdbd; font-style: italic; }
+
+  /* COMPONENT DEMOS */
+  .btn-demo { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    padding: 9px 20px; border-radius: 8px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-primary { background: #e05a20; color: #fff; }
+  .btn-outline { background: transparent; color: #e05a20; border: 1.5px solid #e05a20; }
+  .btn-ghost { background: transparent; color: #6b6b80; border: 0.5px solid #e5ddd4; }
+  .btn-danger { background: #fcebeb; color: #a32d2d; border: 0.5px solid #f0c0c0; }
+
+  /* INPUT DEMO */
+  .input-demo { display: flex; flex-direction: column; gap: 12px; }
+  .field-label { font-size: 11px; font-weight: 600; color: #6b6b80; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .input {
+    width: 100%; padding: 9px 12px;
+    border: 0.5px solid #d8d0c8; border-radius: 7px;
+    font-size: 13px; color: #1a1a2e; background: #fff;
+    outline: none;
+  }
+  .input:focus { border-color: #e05a20; box-shadow: 0 0 0 3px rgba(224,90,32,0.1); }
+
+  /* BADGE DEMO */
+  .badge-demo { display: flex; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 500;
+  }
+  .badge-success { background: #e1f5ee; color: #0f6e56; }
+  .badge-warning { background: #faeeda; color: #854f0b; }
+  .badge-danger  { background: #fcebeb; color: #a32d2d; }
+  .badge-info    { background: #e6f1fb; color: #185fa5; }
+  .badge-neutral { background: #f4f2ee; color: #6b6b80; }
+
+  /* AVATAR DEMO */
+  .avatar {
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff;
+  }
+
+  /* METRIC CARD */
+  .metric-card {
+    background: #fff; border: 0.5px solid #e5e5e5;
+    border-radius: 8px; padding: 14px 16px;
+  }
+  .metric-label { font-size: 10px; color: #aaa; margin-bottom: 4px; }
+  .metric-value { font-size: 22px; font-weight: 700; color: #e05a20; }
+  .metric-delta { font-size: 11px; color: #0f6e56; margin-top: 2px; }
+
+  /* SIDEBAR DEMO */
+  .sidebar-demo {
+    background: #1a1a2e; border-radius: 10px;
+    padding: 16px; width: 180px; color: #fff;
+    font-size: 12px;
+  }
+  .sidebar-demo-tenant { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .sidebar-demo-nav-item { padding: 6px 8px; border-radius: 5px; color: rgba(255,255,255,0.55); margin-bottom: 2px; }
+  .sidebar-demo-nav-item.active { background: rgba(255,255,255,0.08); color: #fff; }
+  .sidebar-demo-footer { margin-top: 16px; padding-top: 12px; border-top: 0.5px solid rgba(255,255,255,0.08); font-size: 9px; color: rgba(255,255,255,0.2); letter-spacing: 0.04em; }
+
+  /* RULE BOX */
+  .rule-box {
+    border-radius: var(--radius-md); padding: 14px 16px;
+    margin: 8px 0;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .rule-box.do { background: #e1f5ee; border-left: 3px solid #0f6e56; }
+  .rule-box.dont { background: #fcebeb; border-left: 3px solid #a32d2d; }
+  .rule-box-icon { font-size: 14px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .rule-box.do .rule-box-icon { color: #0f6e56; }
+  .rule-box.dont .rule-box-icon { color: #a32d2d; }
+  .rule-box-text { font-size: 13px; color: #1a1a2e; }
+
+  /* DIVIDER */
+  .divider { height: 0.5px; background: #e5ddd4; margin: 32px 0; }
+
+  /* SCREEN PRESENCE TABLE */
+  .presence-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .presence-table th { background: #1a1a2e; color: rgba(255,255,255,0.7); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; padding: 8px 12px; font-weight: 600; }
+  .presence-table td { padding: 10px 12px; border-bottom: 0.5px solid #f0f0f0; }
+  .presence-dot { display: inline-flex; align-items: center; gap: 4px; }
+  .dot-star { color: #e05a20; font-size: 12px; }
+  .dot-none { color: #d0d0d0; font-size: 11px; font-style: italic; }
+
+  /* DETAIL CHIP */
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600; background: #f4f2ee; color: #6b6b80; border: 0.5px solid #e5ddd4; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; color: #3a3a4e; padding: 5px 0; }
+  .checklist li::before { content: '☐'; color: #d0d0d0; flex-shrink: 0; font-size: 14px; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 0.5px solid #e5ddd4; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 9px 16px; font-size: 12px; font-weight: 600;
+    color: #9a9a9a; background: none; border: none; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -0.5px;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { color: #e05a20; border-bottom-color: #e05a20; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* URL PATTERN */
+  .url-box {
+    background: #1a1a2e; color: #fff; border-radius: var(--radius-md);
+    padding: 12px 16px; font-family: var(--font-mono); font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .url-accent { color: #e05a20; }
+
+  /* CALLOUT */
+  .callout {
+    background: #fdf6ef; border: 0.5px solid #e8d5c0;
+    border-left: 3px solid #e05a20;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 12px 16px; font-size: 13px; color: #4a3020;
+    margin: 16px 0;
+  }
+  .callout strong { color: #e05a20; }
+
+  /* LOGIN CARD DEMO */
+  .login-card {
+    background: #fff; border: 0.5px solid #e5ddd4;
+    border-radius: 14px; padding: 28px; max-width: 320px;
+    box-shadow: var(--shadow-elevated); text-align: center;
+  }
+
+  /* PRINT + TRANSITIONS */
+  a { color: #e05a20; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">BIGSO</div>
+    <div class="sub">SISTEMA DE DISEÑO · v2.0</div>
+  </div>
+  <nav>
+    <div class="nav-group-label">Fundamentos</div>
+    <a class="nav-link active" onclick="scrollTo('arquitectura')">Arquitectura de marca</a>
+    <a class="nav-link" onclick="scrollTo('paleta')">Paleta de colores</a>
+    <a class="nav-link" onclick="scrollTo('tipografia')">Tipografía</a>
+    <a class="nav-link" onclick="scrollTo('espaciado')">Espaciado y radio</a>
+    <div class="nav-group-label">Componentes</div>
+    <a class="nav-link" onclick="scrollTo('cobranding')">Co-branding</a>
+    <a class="nav-link" onclick="scrollTo('botones')">Botones</a>
+    <a class="nav-link" onclick="scrollTo('formularios')">Formularios</a>
+    <a class="nav-link" onclick="scrollTo('badges')">Badges y estados</a>
+    <a class="nav-link" onclick="scrollTo('metricas')">Cards de métricas</a>
+    <div class="nav-group-label">Layouts</div>
+    <a class="nav-link" onclick="scrollTo('dashboard')">Dashboard</a>
+    <a class="nav-link" onclick="scrollTo('urls')">URLs y subdominios</a>
+    <div class="nav-group-label">Guías</div>
+    <a class="nav-link" onclick="scrollTo('tono')">Tono de voz</a>
+    <a class="nav-link" onclick="scrollTo('reglas')">Reglas y prohibiciones</a>
+    <a class="nav-link" onclick="scrollTo('checklists')">Checklists por pantalla</a>
+  </nav>
+  <div class="sidebar-footer">powered by ORDAMY</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-title">Sistema de diseño · Apps by BIGSO</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="topbar-meta">Mayo 2026</span>
+      <span class="version-badge">v2.0</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- INTRO -->
+    <div style="margin-bottom:48px;">
+      <h1 style="font-size:30px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px;margin-bottom:10px;">Guía de diseño para aplicaciones BIGSO</h1>
+      <p style="font-size:15px;color:#6b6b80;max-width:600px;line-height:1.7;">Este documento es la referencia oficial de diseño y co-branding para todos los productos bajo el paraguas de BIGSO. Aplica a cualquier app SaaS o herramienta digital que siga el modelo de plataforma multi-tenant.</p>
+    </div>
+
+    <!-- 1. ARQUITECTURA -->
+    <section class="section" id="arquitectura">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <div class="section-title">Arquitectura de marca</div>
+      </div>
+      <p class="section-desc">Las apps BIGSO operan con tres niveles de marca que conviven en la interfaz. Comprender cuándo aparece cada una es la base de todo el sistema.</p>
+
+      <div class="card">
+        <div class="card-title">Jerarquía de tres niveles</div>
+        <div class="card-desc">Cada nivel tiene un rol específico. Nunca aparecen los tres en igual jerarquía en la misma pantalla.</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div class="hierarchy-level">
+            <div class="hierarchy-dot" style="background:#bdbdbd;"></div>
+            <div style="flex:1;">
+              <div class="hierarchy-name" style="color:#6b6b80;">EMPRESA HOLDING</div>
+              <div class="hierarchy-role">Respaldo legal e institucional. Nunca es el protagonista de la experiencia de usuario.</div>
+              <div class="hierarchy-when">Aparece en: footer legal, términos y condiciones, facturación.</div>
+            </div>
+          </div>
+          <div class="hierarchy-level">
+            <div class="hierarchy-dot" style="background:#e05a20;"></div>
+            <div style="flex:1;">
+              <div class="hierarchy-name" style="color:#e05a20;">PRODUCTO / PLATAFORMA</div>
+              <div class="hierarchy-role">El producto que el mercado compra. Es la voz del marketing y el onboarding.</div>
+              <div class="hierarchy-when">Aparece en: landing, onboarding, watermark en panel, login contextual.</div>
+            </div>
+          </div>
+          <div class="hierarchy-level">
+            <div class="hierarchy-dot" style="background:#1a1a2e;"></div>
+            <div style="flex:1;">
+              <div class="hierarchy-name">TENANT / CLIENTE</div>
+              <div class="hierarchy-role">El negocio del usuario final. Toma el control en las pantallas operativas.</div>
+              <div class="hierarchy-when">Aparece en: login contextual, dashboard, subdominios, saludo del panel.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Regla de oro:</strong> Cuanto más profundo está el usuario dentro del producto, más retrocede la marca del producto y más avanza la marca del tenant.
+      </div>
+
+      <!-- TABLA DE PRESENCIA -->
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:16px 20px 12px;"><div class="card-title">Presencia por pantalla</div></div>
+        <table class="presence-table">
+          <thead>
+            <tr>
+              <th>Pantalla</th>
+              <th>Tenant</th>
+              <th>Producto</th>
+              <th>Holding</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Landing pública</strong></td>
+              <td><span class="dot-none">Ausente</span></td>
+              <td><span class="dot-star">★★★ Protagonista</span></td>
+              <td><span style="font-size:11px;color:#9a9a9a;">Nav + footer</span></td>
+            </tr>
+            <tr>
+              <td><strong>Login contextual</strong></td>
+              <td><span class="dot-star">★★★ Protagonista</span></td>
+              <td><span style="font-size:11px;color:#9a9a9a;">Sello secundario</span></td>
+              <td><span class="dot-none">Invisible</span></td>
+            </tr>
+            <tr>
+              <td><strong>Onboarding / registro</strong></td>
+              <td><span class="dot-none">Ausente</span></td>
+              <td><span class="dot-star">★★ Principal</span></td>
+              <td><span style="font-size:11px;color:#9a9a9a;">Solo términos</span></td>
+            </tr>
+            <tr>
+              <td><strong>Dashboard interno</strong></td>
+              <td><span class="dot-star">★★★ Protagonista</span></td>
+              <td><span style="font-size:11px;color:#9a9a9a;">Watermark mínimo</span></td>
+              <td><span class="dot-none">Invisible</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 2. PALETA -->
+    <section class="section" id="paleta">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <div class="section-title">Paleta de colores</div>
+      </div>
+      <p class="section-desc">El sistema de color está construido sobre cuatro categorías: color de marca, neutros de superficie, semánticos de estado, y el color de acento del tenant. Cada app define sus propios valores; esta guía establece los roles y reglas de uso.</p>
+
+      <div class="tabs" id="color-tabs">
+        <button class="tab-btn active" onclick="switchTab('color-tabs','brand')">Marca</button>
+        <button class="tab-btn" onclick="switchTab('color-tabs','neutrals')">Neutros</button>
+        <button class="tab-btn" onclick="switchTab('color-tabs','semantic')">Semánticos</button>
+        <button class="tab-btn" onclick="switchTab('color-tabs','tenant')">Tenant</button>
+      </div>
+
+      <div id="tab-brand" class="tab-content active">
+        <div class="card">
+          <div class="card-title">Colores de marca del producto</div>
+          <div class="card-desc">Dos o tres colores de marca bien definidos. Un primario oscuro para tipografía y fondos de UI, un color de acción para CTAs e highlights, y un fondo cálido para páginas públicas.</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;">
+            <div class="swatch">
+              <div class="swatch-color" style="background:var(--brand-dark,#1a1a2e);"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Dark / Navy</div>
+                <div class="swatch-hex">Primario oscuro</div>
+                <div class="swatch-role">Tipografía, navbars, sidebars</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#e05a20;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Accent / Acción</div>
+                <div class="swatch-hex">Color activo</div>
+                <div class="swatch-role">CTAs, highlights, active states</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div class="swatch-color" style="background:#fdf6ef;border:0.5px solid #e5ddd4;"></div>
+              <div class="swatch-info">
+                <div class="swatch-name">Background cálido</div>
+                <div class="swatch-hex">Fondo público</div>
+                <div class="swatch-role">Páginas de marketing, hero</div>
+              </div>
+            </div>
+          </div>
+          <div class="callout" style="margin-top:16px;">
+            <strong>Regla:</strong> El color de acción (naranja, azul, verde, etc.) se reserva exclusivamente para acciones positivas y CTAs. <strong>Nunca</strong> para estados de error o mensajes destructivos.
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-neutrals" class="tab-content">
+        <div class="card">
+          <div class="card-title">Escala de neutros</div>
+          <div class="card-desc">Los neutros definen la legibilidad. Se necesitan al menos 4-5 niveles para crear jerarquía sin usar colores de acento.</div>
+          <table>
+            <thead><tr><th>Token</th><th>Rol</th><th>Nivel de contraste</th></tr></thead>
+            <tbody>
+              <tr><td><code>--text-primary</code></td><td>Títulos y cuerpo principal</td><td>Máximo · WCAG AA+</td></tr>
+              <tr><td><code>--text-secondary</code></td><td>Labels, subtítulos, metadata</td><td>Medio · WCAG AA</td></tr>
+              <tr><td><code>--text-muted</code></td><td>Texto de apoyo, hints</td><td>Bajo · WCAG AA mínimo</td></tr>
+              <tr><td><code>--text-hint</code></td><td>Watermarks, texto legal</td><td>Muy bajo · solo decorativo</td></tr>
+              <tr><td><code>--surface</code></td><td>Fondo de cards y modales</td><td>Blanco puro o casi blanco</td></tr>
+              <tr><td><code>--surface-soft</code></td><td>Fondo de secciones</td><td>Gris muy suave, warm tone</td></tr>
+              <tr><td><code>--border</code></td><td>Bordes principales</td><td>Sutil pero visible</td></tr>
+              <tr><td><code>--border-light</code></td><td>Divisores internos</td><td>Casi invisible</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-semantic" class="tab-content">
+        <div class="card">
+          <div class="card-title">Colores semánticos de estado</div>
+          <div class="card-desc">Cada estado tiene una variante oscura (texto/ícono) y una clara (fondo del badge o card de alerta). Siempre aparecen en pares para cumplir contraste.</div>
+          <div class="grid-2" style="margin-top:8px;">
+            <div class="swatch" style="overflow:visible;">
+              <div style="display:flex;height:40px;">
+                <div style="background:#0f6e56;flex:1;"></div>
+                <div style="background:#e1f5ee;flex:1;"></div>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Éxito</div>
+                <div class="swatch-role">Texto · Fondo — Completado, confirmado</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div style="display:flex;height:40px;">
+                <div style="background:#854f0b;flex:1;"></div>
+                <div style="background:#faeeda;flex:1;"></div>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Advertencia</div>
+                <div class="swatch-role">Texto · Fondo — Atención, pendiente</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div style="display:flex;height:40px;">
+                <div style="background:#a32d2d;flex:1;"></div>
+                <div style="background:#fcebeb;flex:1;"></div>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Error / Peligro</div>
+                <div class="swatch-role">Texto · Fondo — Cancelado, fallido</div>
+              </div>
+            </div>
+            <div class="swatch">
+              <div style="display:flex;height:40px;">
+                <div style="background:#185fa5;flex:1;"></div>
+                <div style="background:#e6f1fb;flex:1;"></div>
+              </div>
+              <div class="swatch-info">
+                <div class="swatch-name">Información</div>
+                <div class="swatch-role">Texto · Fondo — Neutral, datos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-tenant" class="tab-content">
+        <div class="card">
+          <div class="card-title">Color de acento del tenant</div>
+          <div class="card-desc">En el modo estándar, el tenant hereda el color de acción del producto. Si se habilita white-label, cada tenant puede definir su propio color que reemplaza el acento en su contexto de panel.</div>
+          <pre>/* Modo estándar */
+--tenant-accent: var(--brand-action); /* Hereda del producto */
+
+/* Modo white-label (futuro) */
+--tenant-accent: #2563eb; /* Azul del tenant, por ejemplo */
+
+/* Uso del acento de tenant en componentes */
+.btn-primary     { background: var(--tenant-accent); }
+.metric-value    { color: var(--tenant-accent); }
+.tenant-avatar   { background: var(--tenant-accent); }
+.nav-item.active { border-left-color: var(--tenant-accent); }</pre>
+          <div class="rule-box dont">
+            <div class="rule-box-icon">✗</div>
+            <div class="rule-box-text">Usar el color de acento del tenant en badges de error o advertencia. Esos colores semánticos son absolutos.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. TIPOGRAFÍA -->
+    <section class="section" id="tipografia">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <div class="section-title">Tipografía</div>
+      </div>
+      <p class="section-desc">La escala tipográfica se basa en roles, no en tamaños arbitrarios. Cada nivel tiene peso, tamaño y color predefinidos para garantizar jerarquía consistente en toda la app.</p>
+
+      <div class="card">
+        <div class="card-title">Escala de estilos</div>
+        <div style="margin-top:8px;">
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Hero H1</div>
+              <div class="type-meta-spec">28–32px · 800</div>
+            </div>
+            <div style="font-size:30px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px;">Título de pantalla</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Section H2</div>
+              <div class="type-meta-spec">20–22px · 700</div>
+            </div>
+            <div style="font-size:21px;font-weight:700;color:#1a1a2e;">Sección de contenido</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Card H3</div>
+              <div class="type-meta-spec">16–18px · 600</div>
+            </div>
+            <div style="font-size:17px;font-weight:600;color:#1a1a2e;">Título de card o widget</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Body</div>
+              <div class="type-meta-spec">14px · 400</div>
+            </div>
+            <div style="font-size:14px;font-weight:400;color:#1a1a2e;">Texto de cuerpo normal. Descripciones, instrucciones y contenido principal de la interfaz.</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Label</div>
+              <div class="type-meta-spec">11–12px · 500</div>
+            </div>
+            <div style="font-size:12px;font-weight:500;color:#6b6b80;letter-spacing:0.04em;text-transform:uppercase;">LABEL DE CAMPO</div>
+          </div>
+          <div class="type-sample">
+            <div class="type-meta">
+              <div class="type-meta-name">Micro / Legal</div>
+              <div class="type-meta-spec">10px · 400</div>
+            </div>
+            <div style="font-size:10px;color:#9a9a9a;">Texto legal, watermarks, powered by, pie de página</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Colores de texto por rol</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#1a1a2e;flex-shrink:0;"></div>
+              <div><span style="color:#1a1a2e;font-weight:600;">Primary</span> — Títulos y contenido principal</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#6b6b80;flex-shrink:0;"></div>
+              <div><span style="color:#6b6b80;font-weight:600;">Secondary</span> — Labels, metadata</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#9a9a9a;flex-shrink:0;"></div>
+              <div><span style="color:#9a9a9a;font-weight:600;">Muted</span> — Texto de apoyo</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#bdbdbd;flex-shrink:0;"></div>
+              <div><span style="color:#bdbdbd;font-weight:600;">Hint</span> — Watermarks, legal</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px;">
+              <div style="width:16px;height:16px;border-radius:50%;background:#e05a20;flex-shrink:0;"></div>
+              <div><span style="color:#e05a20;font-weight:600;">Accent</span> — Énfasis de marca</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Reglas de tipografía</div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">Usar el mismo typeface en toda la app para consistencia.</div></div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">Definir un mínimo de letra de 10px (watermarks). Nunca menos.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text">Mezclar más de 2 tipografías en la interfaz operativa.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text">Usar el color de acción en texto de cuerpo sin intención clara.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ESPACIADO -->
+    <section class="section" id="espaciado">
+      <div class="section-header">
+        <div class="section-number">4</div>
+        <div class="section-title">Espaciado y radios</div>
+      </div>
+      <p class="section-desc">El espaciado consistente construye ritmo visual. Los radios de borde señalan la jerarquía de los componentes: más prominente el componente, mayor el radio.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Escala de espaciado (base 4px)</div>
+          <div style="margin-top:12px;">
+            <div class="space-row"><div class="space-label">4px</div><div class="space-bar" style="width:4px;"></div><div class="space-desc">Gap mínimo entre íconos y texto</div></div>
+            <div class="space-row"><div class="space-label">8px</div><div class="space-bar" style="width:8px;"></div><div class="space-desc">Gap entre cards de métricas</div></div>
+            <div class="space-row"><div class="space-label">12px</div><div class="space-bar" style="width:12px;"></div><div class="space-desc">Padding interno de cards pequeñas</div></div>
+            <div class="space-row"><div class="space-label">16px</div><div class="space-bar" style="width:16px;"></div><div class="space-desc">Padding estándar de cards</div></div>
+            <div class="space-row"><div class="space-label">24px</div><div class="space-bar" style="width:24px;"></div><div class="space-desc">Separación entre secciones</div></div>
+            <div class="space-row"><div class="space-label">32px</div><div class="space-bar" style="width:32px;"></div><div class="space-desc">Margen de sección principal</div></div>
+            <div class="space-row"><div class="space-label">40px</div><div class="space-bar" style="width:40px;"></div><div class="space-desc">Padding hero, secciones de landing</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Radios de borde por componente</div>
+          <div class="radius-demo" style="margin-top:16px;">
+            <div>
+              <div class="radius-box" style="border-radius:4px;width:56px;height:56px;">
+                <span class="radius-name">4px</span>
+                <span style="font-size:10px;color:#9a9a9a;">Badges</span>
+              </div>
+            </div>
+            <div>
+              <div class="radius-box" style="border-radius:7px;width:72px;height:72px;">
+                <span class="radius-name">7–8px</span>
+                <span style="font-size:10px;color:#9a9a9a;">Botones, inputs</span>
+              </div>
+            </div>
+            <div>
+              <div class="radius-box" style="border-radius:10px;width:88px;height:88px;">
+                <span class="radius-name">10–12px</span>
+                <span style="font-size:10px;color:#9a9a9a;">Cards</span>
+              </div>
+            </div>
+            <div>
+              <div class="radius-box" style="border-radius:14px;width:100px;height:100px;">
+                <span class="radius-name">14px</span>
+                <span style="font-size:10px;color:#9a9a9a;">Modales, paneles</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <table>
+              <tbody>
+                <tr><td>Grosor de borde estándar</td><td><code>0.5px</code></td></tr>
+                <tr><td>Avatar sidebar</td><td><code>30×30px · r:7px</code></td></tr>
+                <tr><td>Avatar login card</td><td><code>52×52px · r:12px</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CO-BRANDING -->
+    <section class="section" id="cobranding">
+      <div class="section-header">
+        <div class="section-number">5</div>
+        <div class="section-title">Componentes de co-branding</div>
+      </div>
+      <p class="section-desc">Los puntos de contacto donde las marcas coexisten tienen reglas estrictas de jerarquía, tamaño y visibilidad. A continuación los patrones canónicos de cada pantalla.</p>
+
+      <div class="tabs" id="brand-tabs">
+        <button class="tab-btn active" onclick="switchTab('brand-tabs','navbar')">Navbar landing</button>
+        <button class="tab-btn" onclick="switchTab('brand-tabs','login')">Login tenant</button>
+        <button class="tab-btn" onclick="switchTab('brand-tabs','sidebar-brand')">Sidebar</button>
+        <button class="tab-btn" onclick="switchTab('brand-tabs','sellos')">Sellos</button>
+      </div>
+
+      <div id="tab-navbar" class="tab-content active">
+        <div class="card">
+          <div class="card-title">Navbar de landing pública</div>
+          <div class="card-desc">El holding aparece en tono muy discreto junto al logo del producto. En páginas internas del producto nunca aparece.</div>
+          <!-- DEMO -->
+          <div style="background:#fff;border:0.5px solid #e5ddd4;border-radius:8px;padding:0 20px;height:44px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:15px;font-weight:800;color:#1a1a2e;letter-spacing:-0.5px;">PRODUCTO</span>
+              <span style="color:#e0e0e0;">|</span>
+              <span style="font-size:10px;color:#9a9a9a;letter-spacing:0.04em;">by HOLDING</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-ghost" style="padding:5px 12px;font-size:12px;">Iniciar sesión</button>
+              <button class="btn btn-primary" style="padding:5px 12px;font-size:12px;">Crear cuenta</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Elemento</th><th>Especificación</th></tr></thead>
+            <tbody>
+              <tr><td>Logo del producto</td><td><code>15px · 800 weight · color primario oscuro · letter-spacing: -0.5px</code></td></tr>
+              <tr><td>Separador</td><td><code>|</code> en color borde claro (<code>#e0e0e0</code>)</td></tr>
+              <tr><td>"by HOLDING"</td><td><code>10px · color muted · letter-spacing: 0.04em</code></td></tr>
+              <tr><td>Altura del navbar</td><td><code>44px</code></td></tr>
+              <tr><td>Fondo</td><td><code>#ffffff</code> con <code>border-bottom: 0.5px</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="tab-login" class="tab-content">
+        <div class="card">
+          <div class="card-title">Login contextual del tenant</div>
+          <div class="card-desc">El tenant es el protagonista. El producto aparece solo en el footer del card como referencia.</div>
+          <div style="display:flex;justify-content:center;margin:20px 0;">
+            <div class="login-card">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;">
+                <div class="avatar" style="width:52px;height:52px;font-size:18px;background:#e05a20;border-radius:12px;">BC</div>
+                <div>
+                  <div style="font-size:16px;font-weight:700;color:#1a1a2e;text-align:center;">Burger Craft</div>
+                  <div style="font-size:11px;color:#9a9a9a;text-align:center;">burgerscraft.producto.co</div>
+                </div>
+              </div>
+              <div class="input-demo" style="margin-bottom:14px;">
+                <div>
+                  <div class="field-label">Correo electrónico</div>
+                  <input class="input" type="email" placeholder="tu@email.com" readonly>
+                </div>
+                <div>
+                  <div class="field-label">Contraseña</div>
+                  <input class="input" type="password" placeholder="••••••••" readonly>
+                </div>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;">Ingresar</button>
+              <div style="margin-top:16px;border-top:0.5px solid #f0f0f0;padding-top:12px;text-align:center;">
+                <div style="font-size:10px;color:#bbb;">Plataforma gestionada por <span style="font-weight:700;color:#888;">PRODUCTO</span></div>
+                <div style="font-size:10px;color:#ccc;">un producto de HOLDING</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-sidebar-brand" class="tab-content">
+        <div class="card">
+          <div class="card-title">Sidebar del dashboard</div>
+          <div class="card-desc">El producto aparece únicamente como watermark casi invisible en el pie. El holding no aparece aquí.</div>
+          <div style="display:flex;gap:24px;align-items:flex-start;margin:16px 0;">
+            <div class="sidebar-demo">
+              <div class="sidebar-demo-tenant">
+                <div class="avatar" style="width:30px;height:30px;font-size:11px;background:#e05a20;border-radius:7px;flex-shrink:0;">BC</div>
+                <div>
+                  <div style="font-size:12px;font-weight:600;">Burger Craft</div>
+                  <div style="font-size:9px;color:rgba(255,255,255,0.35);">Plan Pro</div>
+                </div>
+              </div>
+              <div class="sidebar-demo-nav-item active">📊 Dashboard</div>
+              <div class="sidebar-demo-nav-item">🛒 Órdenes</div>
+              <div class="sidebar-demo-nav-item">📦 Menú</div>
+              <div class="sidebar-demo-nav-item">📈 Reportes</div>
+              <div class="sidebar-demo-nav-item">⚙️ Configuración</div>
+              <div class="sidebar-demo-footer">powered by PRODUCTO</div>
+            </div>
+            <div style="flex:1;">
+              <table>
+                <thead><tr><th>Elemento</th><th>Especificación</th></tr></thead>
+                <tbody>
+                  <tr><td>Avatar del tenant</td><td><code>30×30px · r:7px · color accent</code></td></tr>
+                  <tr><td>Nombre del tenant</td><td><code>12px · 600 · #ffffff</code></td></tr>
+                  <tr><td>Plan</td><td><code>9px · rgba(255,255,255,0.35)</code></td></tr>
+                  <tr><td>"powered by"</td><td><code>9px · rgba(255,255,255,0.2) · solo texto</code></td></tr>
+                  <tr><td>Holding</td><td>No aparece</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-sellos" class="tab-content">
+        <div class="card">
+          <div class="card-title">Variantes del sello de producto</div>
+          <table>
+            <thead><tr><th>Contexto</th><th>Formato</th><th>Estilo</th></tr></thead>
+            <tbody>
+              <tr><td>Sidebar oscuro</td><td><code>powered by PRODUCTO</code></td><td>9px · rgba blanco 20% · solo texto</td></tr>
+              <tr><td>Card de login</td><td><code>Plataforma gestionada por PRODUCTO</code></td><td>10px · gris claro · PRODUCTO en negrita</td></tr>
+              <tr><td>Emails transaccionales</td><td>Logo pequeño + <code>by HOLDING</code></td><td>Footer del email</td></tr>
+              <tr><td>PDFs generados</td><td><code>Generado por PRODUCTO · holding.co</code></td><td>8px · gris · pie de página</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. BOTONES -->
+    <section class="section" id="botones">
+      <div class="section-header">
+        <div class="section-number">6</div>
+        <div class="section-title">Botones</div>
+      </div>
+      <p class="section-desc">Los botones siguen una jerarquía de atención. Solo uno primario por vista. El contexto del tenant puede sobrescribir el color de acento del primario.</p>
+
+      <div class="card">
+        <div class="card-title">Variantes</div>
+        <div class="btn-demo" style="margin:16px 0;">
+          <button class="btn btn-primary">CTA principal</button>
+          <button class="btn btn-outline">Secundario</button>
+          <button class="btn btn-ghost">Ghost</button>
+          <button class="btn btn-danger">Destructivo</button>
+        </div>
+        <table>
+          <thead><tr><th>Variante</th><th>Cuándo usar</th><th>Especificación</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Primary</strong></td><td>Acción principal de la pantalla. Solo uno visible a la vez.</td><td><code>bg: accent · color: #fff · r:8px · 10px 22px</code></td></tr>
+            <tr><td><strong>Outline</strong></td><td>Acciones secundarias importantes.</td><td><code>bg: transparent · border: 1.5px accent · color: accent</code></td></tr>
+            <tr><td><strong>Ghost</strong></td><td>Acciones terciarias o en espacios ya saturados.</td><td><code>bg: transparent · border: 0.5px · color: secondary</code></td></tr>
+            <tr><td><strong>Destructivo</strong></td><td>Eliminar, cancelar, acciones irreversibles.</td><td><code>bg: danger-bg · color: danger · border: 0.5px danger-light</code></td></tr>
+          </tbody>
+        </table>
+        <pre>/* Tamaños */
+.btn-sm   { padding: 6px 14px;  font-size: 12px; }
+.btn-md   { padding: 10px 22px; font-size: 13px; } /* default */
+.btn-lg   { padding: 13px 28px; font-size: 15px; }
+
+/* Radius y font-weight son fijos */
+border-radius: 8px;
+font-weight: 600;</pre>
+      </div>
+    </section>
+
+    <!-- 7. FORMULARIOS -->
+    <section class="section" id="formularios">
+      <div class="section-header">
+        <div class="section-number">7</div>
+        <div class="section-title">Formularios e inputs</div>
+      </div>
+      <p class="section-desc">Los campos de formulario tienen tres estados visibles: reposo, foco y error. El estado de foco usa el color de acento del producto para dar feedback claro.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Estados de campo</div>
+          <div class="input-demo">
+            <div>
+              <div class="field-label">Reposo</div>
+              <input class="input" placeholder="Escribe aquí..." readonly style="border-color:#d8d0c8;">
+            </div>
+            <div>
+              <div class="field-label">Foco (simulado)</div>
+              <input class="input" placeholder="Con focus activo" readonly style="border-color:#e05a20;box-shadow:0 0 0 3px rgba(224,90,32,0.1);">
+            </div>
+            <div>
+              <div class="field-label">Error</div>
+              <input class="input" placeholder="Valor inválido" readonly style="border-color:#a32d2d;box-shadow:0 0 0 3px rgba(163,45,45,0.1);">
+              <div style="font-size:11px;color:#a32d2d;margin-top:4px;">Este campo es requerido.</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Especificaciones</div>
+          <table>
+            <tbody>
+              <tr><td>Altura del input</td><td><code>36–38px</code></td></tr>
+              <tr><td>Padding interno</td><td><code>9px 12px</code></td></tr>
+              <tr><td>Border radius</td><td><code>7px</code></td></tr>
+              <tr><td>Border reposo</td><td><code>0.5px · color border</code></td></tr>
+              <tr><td>Border foco</td><td><code>1px · accent · ring: 3px rgba</code></td></tr>
+              <tr><td>Border error</td><td><code>1px · danger · ring: 3px rgba</code></td></tr>
+              <tr><td>Label</td><td><code>11px · 600 · uppercase · secondary</code></td></tr>
+              <tr><td>Placeholder</td><td><code>13px · 400 · hint color</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. BADGES -->
+    <section class="section" id="badges">
+      <div class="section-header">
+        <div class="section-number">8</div>
+        <div class="section-title">Badges y estados</div>
+      </div>
+      <p class="section-desc">Los badges comunican estado de manera compacta. Siempre usan el par color-texto/color-fondo de la paleta semántica para garantizar contraste.</p>
+
+      <div class="card">
+        <div class="badge-demo" style="margin-bottom:16px;">
+          <span class="badge badge-success">Entregado</span>
+          <span class="badge badge-warning">En camino</span>
+          <span class="badge badge-danger">Cancelado</span>
+          <span class="badge badge-info">En revisión</span>
+          <span class="badge badge-neutral">Borrador</span>
+        </div>
+        <pre>.badge {
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px; /* pill */
+  font-weight: 500;
+}
+
+/* Siempre pares: bg + text del mismo ramp semántico */
+.badge-success { background: var(--success-bg); color: var(--success); }
+.badge-warning { background: var(--warning-bg); color: var(--warning); }
+.badge-danger  { background: var(--danger-bg);  color: var(--danger);  }
+.badge-info    { background: var(--info-bg);    color: var(--info);    }</pre>
+      </div>
+    </section>
+
+    <!-- 9. MÉTRICAS -->
+    <section class="section" id="metricas">
+      <div class="section-header">
+        <div class="section-number">9</div>
+        <div class="section-title">Cards de métricas</div>
+      </div>
+      <p class="section-desc">Las cards de métricas son el corazón del dashboard. El número principal usa el color de acento del tenant. El label es mínimo y casi invisible para que el número domine.</p>
+
+      <div class="grid-4" style="margin-bottom:16px;">
+        <div class="metric-card">
+          <div class="metric-label">VENTAS HOY</div>
+          <div class="metric-value">$1.240</div>
+          <div class="metric-delta">↑ 12% vs ayer</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">ÓRDENES</div>
+          <div class="metric-value">38</div>
+          <div class="metric-delta">↑ 5 nuevas</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">TICKET PROM.</div>
+          <div class="metric-value">$32.6</div>
+          <div class="metric-delta" style="color:#9a9a9a;">Sin cambio</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">PENDIENTES</div>
+          <div class="metric-value" style="color:#854f0b;">7</div>
+          <div class="metric-delta" style="color:#854f0b;">↑ Revisar</div>
+        </div>
+      </div>
+      <pre>.metric-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border-light);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+.metric-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.06em; }
+.metric-value { font-size: 20–24px; font-weight: 700; color: var(--tenant-accent); }
+.metric-delta { font-size: 11px; color: var(--success); margin-top: 2px; }</pre>
+    </section>
+
+    <!-- 10. DASHBOARD LAYOUT -->
+    <section class="section" id="dashboard">
+      <div class="section-header">
+        <div class="section-number">10</div>
+        <div class="section-title">Estructura del dashboard</div>
+      </div>
+      <p class="section-desc">El layout del panel operativo sigue siempre un patrón sidebar + contenido principal. La barra lateral aloja la identidad del tenant y la navegación. El área de contenido aloja datos, métricas y flujos de trabajo.</p>
+
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="display:flex;height:340px;font-size:12px;">
+          <!-- Sidebar -->
+          <div style="width:180px;background:#1a1a2e;color:#fff;padding:16px;display:flex;flex-direction:column;flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:0.5px solid rgba(255,255,255,0.08);">
+              <div class="avatar" style="width:30px;height:30px;font-size:11px;background:#e05a20;border-radius:7px;">BC</div>
+              <div><div style="font-size:12px;font-weight:600;">Burger Craft</div><div style="font-size:9px;color:rgba(255,255,255,0.35);">Plan Pro</div></div>
+            </div>
+            <div style="color:rgba(255,255,255,0.6);padding:6px 8px;border-radius:5px;margin-bottom:3px;">Dashboard</div>
+            <div style="color:rgba(255,255,255,0.4);padding:6px 8px;border-radius:5px;margin-bottom:3px;">Órdenes</div>
+            <div style="color:rgba(255,255,255,0.4);padding:6px 8px;border-radius:5px;margin-bottom:3px;">Menú</div>
+            <div style="color:rgba(255,255,255,0.4);padding:6px 8px;border-radius:5px;margin-bottom:3px;">Reportes</div>
+            <div style="margin-top:auto;border-top:0.5px solid rgba(255,255,255,0.08);padding-top:10px;font-size:9px;color:rgba(255,255,255,0.2);">powered by PRODUCTO</div>
+          </div>
+          <!-- Main -->
+          <div style="flex:1;background:#f7f7f7;display:flex;flex-direction:column;">
+            <!-- Topbar -->
+            <div style="background:#fff;border-bottom:0.5px solid #e5e5e5;padding:0 20px;height:44px;display:flex;align-items:center;justify-content:space-between;">
+              <div style="font-size:13px;font-weight:600;color:#1a1a2e;">Buenos días, Burger Craft 👋</div>
+              <div style="display:flex;gap:6px;align-items:center;">
+                <span class="badge badge-warning">7 pendientes</span>
+                <div class="avatar" style="width:28px;height:28px;font-size:10px;background:#e05a20;border-radius:50%;">JD</div>
+              </div>
+            </div>
+            <!-- Content -->
+            <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:12px;overflow:hidden;">
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                <div class="metric-card" style="padding:10px 12px;">
+                  <div class="metric-label">VENTAS HOY</div>
+                  <div class="metric-value" style="font-size:18px;">$1.240</div>
+                </div>
+                <div class="metric-card" style="padding:10px 12px;">
+                  <div class="metric-label">ÓRDENES</div>
+                  <div class="metric-value" style="font-size:18px;">38</div>
+                </div>
+                <div class="metric-card" style="padding:10px 12px;">
+                  <div class="metric-label">PENDIENTES</div>
+                  <div class="metric-value" style="font-size:18px;color:#854f0b;">7</div>
+                </div>
+              </div>
+              <div style="background:#fff;border:0.5px solid #e5e5e5;border-radius:8px;flex:1;padding:12px;">
+                <div style="font-size:12px;font-weight:600;color:#1a1a2e;margin-bottom:10px;">Órdenes recientes</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;border-bottom:0.5px solid #f5f5f5;">
+                    <span style="color:#6b6b80;">#1042 · Hamburguesa clásica x2</span>
+                    <span class="badge badge-success">Entregado</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;border-bottom:0.5px solid #f5f5f5;">
+                    <span style="color:#6b6b80;">#1043 · Combo familiar</span>
+                    <span class="badge badge-warning">En camino</span>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;padding:6px 0;">
+                    <span style="color:#6b6b80;">#1044 · Papas + bebida</span>
+                    <span class="badge badge-info">En preparación</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card">
+          <div class="card-title">Dimensiones del layout</div>
+          <table>
+            <tbody>
+              <tr><td>Ancho del sidebar</td><td><code>180–220px</code></td></tr>
+              <tr><td>Color de fondo sidebar</td><td><code>Primario oscuro del producto</code></td></tr>
+              <tr><td>Color de fondo contenido</td><td><code>#f7f7f7</code> (gris neutro)</td></tr>
+              <tr><td>Altura del topbar</td><td><code>44px</code></td></tr>
+              <tr><td>Grid de métricas</td><td><code>3 cols · gap: 10px</code></td></tr>
+              <tr><td>Padding del área de contenido</td><td><code>16–24px</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Qué va en el topbar</div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">Saludo con nombre del tenant: "Buenos días, Nombre del negocio"</div></div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">Alertas rápidas en badges (pendientes, notificaciones)</div></div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">Avatar del usuario activo + menú de perfil</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text">Logo del producto. Ya no aparece aquí, está en el sidebar.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text">Logo o nombre del holding (BIGSO). Nunca en el dashboard.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11. URLs -->
+    <section class="section" id="urls">
+      <div class="section-header">
+        <div class="section-number">11</div>
+        <div class="section-title">URLs y subdominios</div>
+      </div>
+      <p class="section-desc">El patrón de URL del tenant refuerza la identidad del producto como plataforma central, mientras personaliza la experiencia con el nombre del negocio.</p>
+
+      <div class="card">
+        <div class="card-title">Patrón estándar</div>
+        <div class="url-box" style="margin:12px 0;">
+          https://<span class="url-accent">{slug-del-tenant}</span>.producto.co
+        </div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+          <div class="url-box" style="font-size:12px;">https://<span class="url-accent">burgerscraft</span>.producto.co</div>
+          <div class="url-box" style="font-size:12px;">https://<span class="url-accent">pizzazeta</span>.producto.co</div>
+          <div class="url-box" style="font-size:12px;">https://<span class="url-accent">tacosaurora</span>.producto.co</div>
+        </div>
+        <div style="margin-top:16px;">
+          <table>
+            <tbody>
+              <tr><td>Landing pública del producto</td><td><code>https://producto.co</code></td></tr>
+              <tr><td>Dashboard del tenant</td><td><code>https://tenant.producto.co</code></td></tr>
+              <tr><td>Holding en URL</td><td>No aparece en ninguna URL pública</td></tr>
+              <tr><td>Generación del slug</td><td>Automático desde el nombre del negocio en onboarding. Editable.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 12. TONO -->
+    <section class="section" id="tono">
+      <div class="section-header">
+        <div class="section-number">12</div>
+        <div class="section-title">Tono de voz por contexto</div>
+      </div>
+      <p class="section-desc">Cada nivel de la arquitectura de marca habla con una voz distinta. El tono cambia con la profundidad de la pantalla.</p>
+
+      <div class="grid-3">
+        <div class="card" style="border-top:3px solid #bdbdbd;">
+          <div class="card-title" style="color:#9a9a9a;">HOLDING</div>
+          <div style="font-size:12px;color:#6b6b80;margin:8px 0;line-height:1.6;">Institucional, legal, técnico. Solo aparece en contextos formales.</div>
+          <div style="font-size:11px;color:#bdbdbd;font-style:italic;border-top:0.5px solid #f0f0f0;padding-top:10px;margin-top:8px;">
+            "HOLDING S.A.S., desarrollador de PRODUCTO"<br>
+            "© 2026 HOLDING S.A.S. · Todos los derechos reservados"
+          </div>
+        </div>
+        <div class="card" style="border-top:3px solid #e05a20;">
+          <div class="card-title" style="color:#e05a20;">PRODUCTO</div>
+          <div style="font-size:12px;color:#6b6b80;margin:8px 0;line-height:1.6;">Directo, empoderador, orientado al negocio. Sin jerga técnica.</div>
+          <div style="font-size:11px;color:#bdbdbd;font-style:italic;border-top:0.5px solid #f0f0f0;padding-top:10px;margin-top:8px;">
+            "Optimiza y controla tu negocio al máximo"<br>
+            "Gestión en una sola plataforma"<br>
+            "Plataforma gestionada por PRODUCTO"
+          </div>
+        </div>
+        <div class="card" style="border-top:3px solid #1a1a2e;">
+          <div class="card-title">SISTEMA → TENANT</div>
+          <div style="font-size:12px;color:#6b6b80;margin:8px 0;line-height:1.6;">Segunda persona directa. El nombre del tenant siempre en mayúscula inicial como nombre propio.</div>
+          <div style="font-size:11px;color:#bdbdbd;font-style:italic;border-top:0.5px solid #f0f0f0;padding-top:10px;margin-top:8px;">
+            "Buenos días, Burger Craft"<br>
+            "Tu panel está listo"<br>
+            "5 órdenes pendientes"
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 13. REGLAS -->
+    <section class="section" id="reglas">
+      <div class="section-header">
+        <div class="section-number">13</div>
+        <div class="section-title">Reglas y prohibiciones</div>
+      </div>
+      <p class="section-desc">Las siguientes reglas son absolutas. No tienen excepciones por contexto o urgencia.</p>
+
+      <div class="card">
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No mostrar el holding en el dashboard del tenant.</strong> Solo aparece en landing y footer legal.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No ocultar el producto completamente en el panel.</strong> Siempre debe aparecer como watermark mínimo.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No igualar el tamaño del logo del producto con el del tenant.</strong> El tenant es siempre más prominente en su contexto.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No mezclar los 3 logos en igual jerarquía.</strong> Máximo 2 marcas visibles con jerarquía clara.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No usar el color de acción para errores.</strong> El naranja/acento es exclusivo de acciones positivas y CTAs.</div></div>
+          <div class="rule-box dont"><div class="rule-box-icon">✗</div><div class="rule-box-text"><strong>No escribir "powered by HOLDING".</strong> El sello es siempre "powered by PRODUCTO".</div></div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">El tenant siempre va nombrado con mayúscula inicial como nombre propio: "Burger Craft", nunca "burger craft" o "BURGER CRAFT".</div></div>
+          <div class="rule-box do"><div class="rule-box-icon">✓</div><div class="rule-box-text">El color de acento del tenant reemplaza el color de acción del producto dentro de su panel.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14. CHECKLISTS -->
+    <section class="section" id="checklists">
+      <div class="section-header">
+        <div class="section-number">14</div>
+        <div class="section-title">Checklists por pantalla</div>
+      </div>
+      <p class="section-desc">Verificar estos puntos antes de entregar cualquier pantalla al equipo de producto.</p>
+
+      <div class="tabs" id="check-tabs">
+        <button class="tab-btn active" onclick="switchTab('check-tabs','c-landing')">Landing</button>
+        <button class="tab-btn" onclick="switchTab('check-tabs','c-login')">Login</button>
+        <button class="tab-btn" onclick="switchTab('check-tabs','c-onboarding')">Onboarding</button>
+        <button class="tab-btn" onclick="switchTab('check-tabs','c-dashboard')">Dashboard</button>
+      </div>
+
+      <div id="tab-c-landing" class="tab-content active">
+        <div class="card">
+          <div class="card-title">Landing pública</div>
+          <ul class="checklist" style="margin-top:12px;">
+            <li>Logo del producto visible y prominente en navbar</li>
+            <li>"by HOLDING" discreto junto al logo (nav), en gris</li>
+            <li>Sin referencia al tenant ni a subdominios</li>
+            <li>Footer con copyright del holding</li>
+            <li>CTA en color de acción del producto</li>
+            <li>Fondo cálido en el hero (no blanco puro)</li>
+            <li>Tipografía hero en 28–32px · 800 weight</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="tab-c-login" class="tab-content">
+        <div class="card">
+          <div class="card-title">Login contextual del tenant</div>
+          <ul class="checklist" style="margin-top:12px;">
+            <li>Avatar/logo del tenant centrado y prominente (52×52px)</li>
+            <li>Nombre del tenant como elemento principal del card</li>
+            <li>URL del subdominio visible bajo el nombre</li>
+            <li>"Plataforma gestionada por PRODUCTO" en footer del card</li>
+            <li>"un producto de HOLDING" como segunda línea, casi invisible</li>
+            <li>Color del botón de login: acento estándar o del tenant si white-label</li>
+            <li>Holding no aparece en ningún otro lugar del card</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="tab-c-onboarding" class="tab-content">
+        <div class="card">
+          <div class="card-title">Onboarding / registro</div>
+          <ul class="checklist" style="margin-top:12px;">
+            <li>Logo del producto en navbar prominente</li>
+            <li>Indicador de paso visible: "Paso X de Y"</li>
+            <li>Sin mencionar el holding hasta el pie del formulario (términos)</li>
+            <li>Tono guiado y cercano en los labels y descripciones</li>
+            <li>Sin referencia al tenant (todavía está en creación)</li>
+            <li>CTA en color de acción del producto</li>
+          </ul>
+        </div>
+      </div>
+
+      <div id="tab-c-dashboard" class="tab-content">
+        <div class="card">
+          <div class="card-title">Dashboard interno</div>
+          <ul class="checklist" style="margin-top:12px;">
+            <li>Avatar/logo del tenant en el header del sidebar</li>
+            <li>Color de acento del tenant en métricas, CTAs y active states</li>
+            <li>"powered by PRODUCTO" solo en pie del sidebar, tamaño mínimo</li>
+            <li>Holding completamente ausente en toda la pantalla</li>
+            <li>Saludo con nombre del tenant en el topbar</li>
+            <li>Logo del producto ausente (no aparece en dashboards)</li>
+            <li>Badges de estado usando solo colores semánticos, no el acento</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div style="height:40px;"></div>
+
+  </div><!-- /content -->
+</main>
+
+<script>
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+function switchTab(groupId, tabId) {
+  const group = document.getElementById(groupId);
+  const container = group.closest('.section') || document;
+  const buttons = group.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const contents = document.querySelectorAll('#tab-' + tabId);
+  const allContents = container.querySelectorAll('.tab-content');
+  allContents.forEach(c => {
+    const cid = c.id.replace('tab-','');
+    const siblingBtn = group.querySelector(`[onclick*="${cid}"]`);
+    if (siblingBtn) c.classList.remove('active');
+  });
+  document.getElementById('tab-' + tabId).classList.add('active');
+}
+
+// Active nav on scroll
+const sections = document.querySelectorAll('.section');
+const navLinks = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => {
+    if (window.scrollY >= s.offsetTop - 80) current = s.id;
+  });
+  navLinks.forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('onclick') && l.getAttribute('onclick').includes(`'${current}'`)) {
+      l.classList.add('active');
+    }
+  });
+}, { passive: true });
+</script>
+</body>
+</html>
